@@ -1,7 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
-#include <queue>
+#include <set>
+#include <algorithm>
 
 using std::cin;
 using std::cout;
@@ -9,18 +10,14 @@ using std::endl;
 using std::ws;
 using std::cerr;
 using std::vector;
-using std::priority_queue;
+using std::set;
+using std::max_element;
 
-struct Node{
-  unsigned int vIndex;
-  unsigned int weight;
-};
-
-vector<unsigned int> weights;
+vector<unsigned long int> weights;
 vector<vector<unsigned int> > edges;
-double global_best;
+unsigned long int global_best;
 
-void search (const vector<Node>&, const vector<Node>&, double, double);
+void search (const set<unsigned int>&, unsigned long int, unsigned long int);
 
 int main(void){
   int num_cases;
@@ -38,16 +35,13 @@ int main(void){
       exit(EXIT_FAILURE);
     }
     
-    vector<Node> nodes(num_vertices);
+    set<unsigned int> nodeIndices;
     weights.resize(num_vertices, -1);
-    double sum = 0;
+    unsigned long int sum = 0;
     for (int vCounter = 0; vCounter < num_vertices; vCounter++){
       cin >> weights[vCounter];
-      Node current_node;
-      current_node.vIndex = vCounter;
-      current_node.weight = weights[vCounter];
-      sum += current_node.weight;
-      nodes.push_back(current_node);
+      sum += weights[vCounter];
+      nodeIndices.insert(vCounter);
     }
 
     edges.resize(num_vertices);
@@ -61,15 +55,14 @@ int main(void){
     }
     
     global_best = 0;
-    vector<Node> init;
-    search (init, nodes, 0, sum);
+    search (nodeIndices, 0, sum);
     cout << global_best << endl;
   }
 
   return 0;
 }
 
-void search (const vector<Node>& in_set, const vector<Node>& candidates, double inWeightSum, double candWeightSum){
+void search (const set<unsigned int>& candidates, unsigned long int inWeightSum, unsigned long int candWeightSum){
 
   if (candidates.empty()){
     if (inWeightSum > global_best)
@@ -77,21 +70,29 @@ void search (const vector<Node>& in_set, const vector<Node>& candidates, double 
     return;
   }
   
-  vector<Node> cand (candidates);
+  set<unsigned int> cand (candidates);
 
   if (inWeightSum + candWeightSum > global_best){
-    vector<Node> in (in_set);
     while (!cand.empty()){
-      Node nextNode = cand.back();
-      cand.pop_back();
-      in.push_back(nextNode);
-      candWeightSum -= nextNode.weight;
-      double partial = inWeightSum + nextNode.weight;
-      //This is crazy! Why are we copying this everywhere?
-      vector<Node> cand2 (cand);
-      //TODO remove those nodes from cand2 which are adjacent to nextNode
-      search(in, cand2, partial, candWeightSum);
-      in.pop_back();
+      set<unsigned int>::iterator maxItr = cand.begin();
+      unsigned long int max = weights[*(cand.begin())];
+      for (set<unsigned int>::iterator itr = cand.begin(), endItr = cand.end(); itr != endItr; itr++)
+        if (weights[*itr] > max){
+          maxItr = itr;
+          max = weights[*itr];
+        }
+      unsigned int nextNodeIndex = *maxItr;
+      cand.erase(maxItr);
+      candWeightSum -= weights[nextNodeIndex];
+      unsigned long int partial = inWeightSum + weights[nextNodeIndex];
+      
+      // You gotta be kidding me!
+      set<unsigned int> cand2 (cand);
+      for (vector<unsigned int>::iterator itr = edges[nextNodeIndex].begin() , endItr = edges[nextNodeIndex].end();
+           itr != endItr; itr++)
+        cand2.erase(*itr);
+
+      search(cand2, partial, candWeightSum);
     }
   }
     return;
