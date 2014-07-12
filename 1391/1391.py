@@ -4,7 +4,6 @@
 import sys
 import math
 
-# probably no need to have maxPrime
 def generatePrimes (limit):
     nums = [True] * (limit+1)
     counter = 2;
@@ -15,19 +14,16 @@ def generatePrimes (limit):
                 nums[counter*ind] = False
                 ind += 1
         counter += 1;
-    maxPrime = 2
     primes = set()
     for i in range(2,limit+1):
         if nums[i]:
             primes.add(i)
-            maxPrime = i
-    return (primes,maxPrime)
+    return (primes)
 
 def findp2 (primes):
     p2 = []
     for p in primes:
         for j in range(1,math.floor(p**(1/2))+1):
-            #print ("p:{} j:{}".format(p,j))
             firstQ = j**2;
             secondQ = p - firstQ;
             secondq = secondQ**(1/2)
@@ -57,7 +53,7 @@ def initppArr():
 def main():
     line = sys.stdin.readline().strip()
     numCases = int(line)
-    (primes,maxPrime) = generatePrimes(8000)
+    (primes) = generatePrimes(8000)
     p2 = findp2 (primes)
     initppArr()
 
