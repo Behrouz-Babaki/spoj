@@ -3,7 +3,7 @@
 DOXY = doxygen
 MAINNAME = 3377
 CXX = g++
-CPPFLAGS = -g -std=c++0x
+CPPFLAGS = -g 
 
 all : $(MAINNAME)
 
