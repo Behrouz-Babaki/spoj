@@ -45,13 +45,16 @@ int main(void) {
     cout << "Scenario #" << caseCounter+1 << ":" << endl;
     sex[order[0]] = 0;
     if (!suspicious(interactions, order, 0, sex))
-      cout << "No ";
+      cout << "No suspicious ";
     else
       {
+	sex[order[0]] = 1;
 	if (!suspicious(interactions, order, 0, sex))
-	  cout << "No ";
+	  cout << "No suspicious ";
+	else 
+	  cout << "Suspicious ";
       }
-    cout << "Suspicious bugs found!" << endl;
+    cout << "bugs found!" << endl;
   }
   
   return 0;
@@ -72,9 +75,17 @@ bool suspicious (const vector<vector<unsigned int> >& interactions, const vector
   int index = order[orderId];
 
   // check for inconsistencies
+  vector<int> indices;
   for (vector<unsigned int>::const_iterator itr = interactions[index].begin() , end = interactions[index].end(); itr != end; itr++)
-    if (sex[*itr] == sex[index])
+    if (sex[*itr] == sex[index]) {
+      for (int i = 0, s = indices.size(); i < s; i++)
+      	sex[indices[i]] = 2;
       return true;
+    }
+    else if (sex[*itr] == 2) {
+      sex[*itr] = 1 - sex[index];
+      indices.push_back(*itr);
+    }
 
   orderId ++;
   if (orderId == numBugs)
@@ -85,14 +96,17 @@ bool suspicious (const vector<vector<unsigned int> >& interactions, const vector
     return suspicious(interactions, order, orderId, sex);
     
  else {
-   vector<char> sex_ (sex);
-   sex_[index] = 0;
-   if (!suspicious(interactions, order, orderId, sex_)) 
+   sex[index] = 0;
+   if (!suspicious(interactions, order, orderId, sex)) {
      return false;
-   sex_[index] = 1;
-   if (!suspicious(interactions, order, orderId, sex_))
+   }
+   sex[index] = 1;
+   if (!suspicious(interactions, order, orderId, sex)) {
      return false;
+   }
  }
   
-  return true; // a bit curious 
+  for (int i = 0, s = indices.size(); i < s; i++)
+    sex [indices[i]] = 2;
+  return true; 
 }
