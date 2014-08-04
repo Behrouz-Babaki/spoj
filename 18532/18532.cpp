@@ -13,8 +13,6 @@ bool checktree (vector<size_t> preorder, size_t pre_start, size_t pre_end,
 		vector<size_t> postorder, size_t post_start, size_t post_end,
 		vector<size_t> inorder, size_t in_start, size_t in_end);
 
-void printvec (const vector<size_t>& vec);
-
 int main (void) {
   ios_base::sync_with_stdio (false);
 
@@ -52,7 +50,6 @@ bool checktree (vector<size_t> preorder, size_t pre_start, size_t pre_end,
   int in_dif = in_end - in_start;
   
   if (pre_dif != post_dif || post_dif != in_dif ) {
-    cout << "1 " << pre_start << "-" << pre_end<< " " << post_start << "-" << post_end << " " << in_start << "-" << in_end << endl;
     return false;
   }
 
@@ -63,6 +60,19 @@ bool checktree (vector<size_t> preorder, size_t pre_start, size_t pre_end,
   size_t p_left = preorder [pre_start + 1];
   size_t p_right = postorder[post_end-1];
 
+  if (p_right == p_left) {
+    // either left or right subtree is nonexistent 
+    if (inorder[in_start] == parent)
+      return checktree (preorder, pre_start + 1, pre_end,
+			postorder, post_start, post_end - 1,
+			inorder, in_start + 1, in_end);
+    if (inorder[in_end] == parent)
+      return checktree (preorder, pre_start + 1, pre_end,
+			postorder, post_start, post_end - 1,
+			inorder, in_start , in_end - 1);
+    return false;
+  }
+
   bool found = false;
   size_t left_pre_end = 0;
   int counter;
@@ -72,10 +82,8 @@ bool checktree (vector<size_t> preorder, size_t pre_start, size_t pre_end,
       found = true;
     }
 
-  if (!found) {
-    cout << "2" << endl;
+  if (!found) 
     return false;
-  }
   
   found = false;
   size_t left_in_end = 0;
@@ -85,10 +93,8 @@ bool checktree (vector<size_t> preorder, size_t pre_start, size_t pre_end,
       found = true;
     }
 
-  if (!found) {
-    cout << "3" << endl;
+  if (!found) 
     return false;
-  }
   
   found = false;
   size_t left_post_end = 0;
@@ -98,40 +104,26 @@ bool checktree (vector<size_t> preorder, size_t pre_start, size_t pre_end,
       found = true;
     }
 
-  if (!found) {
-    cout << "4" << endl;
+  if (!found) 
     return false; 
-  }
-
 
   // parents should look the same
-  if (preorder[pre_start] != inorder[left_in_end + 1] || preorder[pre_start] != postorder [post_end]) {
-    cout << "5" << endl;
+  if (preorder[pre_start] != inorder[left_in_end + 1] || preorder[pre_start] != postorder [post_end]) 
     return false;
-  }
+
   
   if (!checktree (preorder, pre_start + 1, left_pre_end,
 			 postorder, post_start, left_post_end, 
 		  inorder, in_start, left_in_end))
-    {
-      cout << "6" << endl;
       return false;
-    }
 
   if (pre_end >= left_pre_end + 1 && !checktree (preorder, left_pre_end + 1, pre_end,
 	     postorder, left_post_end + 1, post_end - 1,
 	     inorder, left_in_end + 2, in_end))
-    {
-      cout << "7" << endl;
       return false;
-    }
   
   //both tests passed!
   return true;
 
 }
 
-void printvec (const vector<size_t>& vec) {
-  for (int counter = 0, size = vec.size(); counter < size; counter++)
-    cout << vec[counter] << " -- ";
-}
