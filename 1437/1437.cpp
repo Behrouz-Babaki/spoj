@@ -8,15 +8,18 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-void updateDistances (int index, vector<int>& distances, const vector<vector<unsigned int> >& graph);
+void updateDistances (int index, vector<unsigned int>& distances, vector<bool>& visited, const vector<vector<unsigned int> >& graph);
 void printDistances (const vector<int>& distances);
+
+int maxIndex; 
+int maxDist;
 
 int main(void) {
   int numNodes;
   cin >> numNodes;
 
   vector<vector<unsigned int> > graph (numNodes, vector<unsigned int>());
-
+  vector<unsigned int> distances (numNodes, 0);
 
   for (int edgeCounter = 0; edgeCounter < numNodes - 1; edgeCounter++)
     {
@@ -26,30 +29,33 @@ int main(void) {
       graph [second-1].push_back(first-1);
     }
 
-  int maxDist = 0;
-  for (int nodeCounter = 0; nodeCounter < numNodes; nodeCounter++) {
-      vector<int> distances (numNodes, numNodes);
-      distances [nodeCounter] = 0;
-      updateDistances (nodeCounter, distances, graph);
-      //printDistances (distances);
-      int max = 0;
-      for (int counter = 0, size = distances.size(); counter < size; counter++) 
-	if (distances[counter] > max) 
-	  max = distances [counter];
+  maxIndex = 0;
+  maxDist = 0;
+  vector<bool> visited (numNodes, false);
+  updateDistances (maxIndex, distances, visited, graph);
 
-      if (maxDist < max)
-	maxDist = max;
-  }
+  distances.clear();
+  visited.clear();
+  distances.resize(numNodes, 0);
+  visited.resize(numNodes, false);
+  updateDistances (maxIndex, distances, visited, graph);
+  
   cout << maxDist << endl;
+
   return 0;
 }
 
-void updateDistances (int index, vector<int>& distances, const vector<vector<unsigned int> >& graph) {
+void updateDistances (int index, vector<unsigned int>& distances, vector<bool>& visited, const vector<vector<unsigned int> >& graph) {
+  visited[index] = true;
   for (int counter = 0, end = graph[index].size(); counter < end; counter++) {
     int id = graph[index][counter];
-    if (distances [id] > distances [index] + 1) {
+    if (!visited[id]) {
       distances [id] = distances[index] + 1;
-      updateDistances (id, distances, graph);
+      if (distances[id] > maxDist) {
+	maxIndex = id;
+	maxDist = distances[id];
+      }
+      updateDistances (id, distances, visited, graph);
     }
   }
   
