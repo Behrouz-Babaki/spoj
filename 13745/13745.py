@@ -14,13 +14,20 @@ nei [8] = [5,7,9]
 nei [9] = [8,6]
 nei [0] = [7]
 
-def ways (n, pos, val):
-    if pos == n:
-        return 1;
-    w = 0;
-    for vv in nei[val]:
-        w += ways (n, pos+1, vv)
-    return w
+def ways (n):
+    w = {};
+    for i in range(10):
+        w[(i,1)] = 1
+    for j in range(2,n+1):
+        for i in range(10):
+          ww = 0
+          for k in nei [i]:
+              ww += w[(k,j-1)]
+          w[(i,j)] = ww
+    result = 0
+    for i in range(10):
+        result += w[(i,n)]
+    return result
     
 
 def main():
@@ -29,10 +36,7 @@ def main():
     for i in range(numCases):
         line = sys.stdin.readline()
         n = int(line)
-        w = 0
-        for val in range(10):
-            w += ways (n, 1, val)
-        print (w % 1000000007)
+        print (ways(n) % 1000000007)
         
 
 if __name__ == "__main__":
